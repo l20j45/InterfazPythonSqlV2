@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+*.txt
+prueba*
+conexionlocal.py
+.conexion.py.swp
+..gitignore.swp
+nohup.out
+*.sql
+*.7z

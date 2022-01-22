@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="8e83acc1-b53f-42c9-8335-fd90b5012f83" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../por_lotes_sipref/Altas/AltaAbonos.py" beforeDir="false" afterPath="$PROJECT_DIR$/../por_lotes_sipref/Altas/AltaAbonos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../por_lotes_sipref/Altas/AltaContratos.py" beforeDir="false" afterPath="$PROJECT_DIR$/../por_lotes_sipref/Altas/AltaContratos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../por_lotes_sipref/Localidades/BuscaColonias.py" beforeDir="false" afterPath="$PROJECT_DIR$/../por_lotes_sipref/Localidades/BuscaColonias.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../por_lotes_sipref/Localidades/BuscaLocalidades.py" beforeDir="false" afterPath="$PROJECT_DIR$/../por_lotes_sipref/Localidades/BuscaLocalidades.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../por_lotes_sipref/Localidades/BuscaMunicipios.py" beforeDir="false" afterPath="$PROJECT_DIR$/../por_lotes_sipref/Localidades/BuscaMunicipios.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../por_lotes_sipref/procesamiento/separaNombres.py" beforeDir="false" afterPath="$PROJECT_DIR$/../por_lotes_sipref/procesamiento/separaNombres.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="22vDYxM5Vz7nlFzfODNKre30GTt" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8e83acc1-b53f-42c9-8335-fd90b5012f83" name="Changes" comment="" />
+      <created>1640709229654</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1640709229654</updated>
+      <workItem from="1640709232701" duration="73000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
