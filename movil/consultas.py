@@ -4,6 +4,9 @@ from urllib.parse import quote
 import mysql.connector
 import re
 
+listaEstatus={ 3 : 'Activo', 7 : 'Finalizado'}
+listaTipoDeCobranza={ 0 : 'Domicilio', 1 : 'Oficina'}
+
 def busquedaFolio(interfazSql,folios,baseDeDatos):
     rango = False
     for letra in folios:
@@ -106,7 +109,7 @@ def busquedaCruzada(interfazSql,nombre,baseDeDatos):
     sql="""SELECT fp.idpersonal, concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) as nombreCompleto ,a.idagente_folio, a.folio, a.status_folio
     from funeraria_personal fp
     inner join funeraria_agente_folios a on a.idpersonal = fp.idpersonal
-    where concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) like "%%%s%%" and a.status_folio=0; """ % (nombre)
+    where concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) like "%%%s%%" and a.status_folio=0 ORDER BY a.fecha , a.folio; """ % (nombre)
     print(sql)
     try:
         interfazSql.execute(sql) ##ejecutamos el sql    
@@ -204,7 +207,7 @@ def busquedaContratoApp(interfazSql,folio,baseDeDatos):
     os.system ("clear") 
     sql="""SELECT
 	FCI.idcontrato_individual,FCI.Folio,FCI.Estatus,FCI.Nombre,FCI.Apellido_Paterno,FCI.Apellido_Materno,
-    FCI.latitud,FCI.longitud,FCI.idcolonia,FC.Colonia, FCCC.idpersonal, FP.nombre_completo,FP.usuario,FP.clave,FCI.Fecha
+    FCI.latitud,FCI.longitud,FCI.idcolonia,FC.Colonia, FCCC.idpersonal, FP.nombre_completo,FP.usuario,FP.clave,FCI.Fecha,FCI.Monto_Liquidado,FCI.Saldo_Deudor,FCI.Tipo_Cobranza,FCI.pago_programado
 from funeraria_contrato_individual FCI
 	left join funeraria_colonia FC
 		on  FCI.idcolonia = FC.idcolonia
@@ -228,8 +231,9 @@ from funeraria_contrato_individual FCI
             file.write(f"{datos[0]}\nContrato Buscado: {folio}")            
             file.write("=====================================================")
             for row in registros:
-                mensaje1=f"Folio encontrado: {row[1]} \nFecha contrato: {row[14]} \nCodigo contrato: {row[0]} Estatus: {row[2]} \nNombre del Cliente: {row[3]} {row[4]} {row[5]}"  
-                mensaje2=f"Latitud {row[6]} Longitud {row[7]} \n\nId_colonia: {row[8]} Colonia: {row[9]} \nidPersonal: {row[10]} Nombre personal: {row[11]} Usuario: {row[12]} clave: {row[13]}"
+                
+                mensaje1=f"Folio encontrado: {row[1]} \nFecha contrato: {row[14]} fecha del proximo pago: {row[18]} \nCodigo contrato: {row[0]} Estatus: {listaEstatus[row[2]]}\nTipo de cobranza: {listaTipoDeCobranza[row[17]]}  Monto liquidado: {round(row[15],2)} Saldo deudo: {round(row[16],2)} \nNombre del Cliente: {row[3]} {row[4]} {row[5]}"  
+                mensaje2=f"Latitud {row[6]} Longitud {row[7]} \nId_colonia: {row[8]} Colonia: {row[9]} \nidPersonal: {row[10]} Nombre personal: {row[11]} Usuario: {row[12]} clave: {row[13]}"
                 imprimir(mensaje1,mensaje2,file)
         else:
             print ("registros no encontrados")
@@ -447,13 +451,18 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                 file.write(f"{datos[0]}\nPersona buscada: {nombreMostrar}")            
                 file.write("\n=====================================================")
                 contador = 0
+                contadorSinGps = 0
                 for row in registros2:
                     mensaje1=f"registro : {contador+1}\nfolio {row[0]}: idcontrato : {row[1]} ruta : {row[2]}\nnombre {row[3]}: latitud : {row[4]} longitud : {row[5]}"
                     mensaje2=f"ultimo dia de pago  {row[6]}: app ultimo dia de pago : {row[7]}\nnumero de pagos  {row[8]}: app numero de pagos : {row[9]} pagos "
+                    if row[4] == "0" or row[5] == "0" :
+                        contadorSinGps+=1
                     imprimir(mensaje1,mensaje2,file)
                     contador+=1
                 print("=====================================================")
                 print(f"NUMERO DE CONTRATOS EN LA APP : {contador-1}")
+                print(f"NUMERO DE CONTRATOS EN LA APP SIN PUNTOS GPS : {contadorSinGps}")
+                print(f"NUMERO DE CONTRATOS EN LA APP CON PUNTOS GPS : {contador-1-contadorSinGps}")
             else:
                 print("esta persona no tiene contratos en vistas")
         else:
@@ -486,7 +495,7 @@ def busquedaContratoVista(interfazSql,folio,baseDeDatos):
             file.write(f"{datos[0]}\nContrato Buscado: {folio}")            
             file.write("\n=====================================================")
             for row in registros:
-                mensaje1=f"registro : {contador+1}\nfolio {row[0]}: idcontrato : {row[1]} ruta : {row[2]}\nnombre del vendedor: {row[11]} usuario: {row[12]} \nnombre {row[3]}: latitud : {row[4]} longitud : {row[5]}"
+                mensaje1=f"registro : {contador+1}\nfolio {row[0]}: idcontrato : {row[1]} ruta : {row[2]}\nnombre del vendedor: {row[11]} usuario: {row[12]} \nnombre {row[3]}: latitud : {round(float(row[4]),5)} longitud : {round(float(row[5]),5)}"
                 mensaje2=f"ultimo dia de pago  {row[6]}: app ultimo dia de pago : {row[7]}\nnumero de pagos  {row[8]}: app numero de pagos : {row[9]} pagos {row[10]}"
                 imprimir(mensaje1,mensaje2,file)
                 contador+=1
