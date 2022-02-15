@@ -4,7 +4,7 @@ from urllib.parse import quote
 import mysql.connector
 import re
 
-listaEstatus={ 3 : 'Activo', 7 : 'Finalizado'}
+listaEstatus={0:'Nuevo',1:'Firma',2:'Entregado',3:'Activo',4:'Suspendido',5:'Domicilio',6:'Cancelado',7:'Pagado',8:'Utilizado'}
 listaTipoDeCobranza={ 0 : 'Domicilio', 1 : 'Oficina'}
 
 def busquedaFolio(interfazSql,folios,baseDeDatos):
@@ -148,61 +148,6 @@ def modAplicacion(interfazSql,baseDeDatos):
                 print(err)
                 print("Message", err.msg)     
     
-''' def busquedaRutas(interfazSql,nombre,baseDeDatos):
-    os.system ("clear") 
-    sql="""select FP.idpersonal, FP.nombre_completo,FP.usuario,FP.clave, FCCC.idcolonia,FC.Colonia,fl.Localidad,fm.Municipio,fe.Estado
-from funeraria_personal FP
-left join funeraria_comisiones_cobrador_colonia FCCC on FCCC.idpersonal = FP.idpersonal
-left join funeraria_colonia FC on  FC.idcolonia = FCCC.idcolonia
-left join funeraria_localidad fl on FC.idlocalidad = fl.idlocalidad
-left join funeraria_municipios fm on fl.idmunicipio = fm.idmunicipio
-left join funeraria_estado fe on fe.idestado = fm.idestado
-where FP.nombre_completo like "%%%s%%" OR FP.usuario like "%%%s%%";
- """ % (nombre,nombre)
-    print(sql)
-    try:
-        interfazSql.execute(sql) ##ejecutamos el sql    
-        registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
-        # print(len(prueba)) imprimimos el numero de registros
-        datos=menuFunesBusqueda(baseDeDatos)
-        listaColonias = []
-        print(datos)
-        if len(registros) != 0:
-            print (f"\npersona buscada:{nombre}")
-            print("=====================================================\n")
-            file = open('LocalidadesApp.txt','w')
-            file.write(f"{datos[0]}\npersona buscada: {nombre}\n")            
-            file.write("=====================================================\n")
-            for row in registros:
-                mensaje1=f"Persona encontrada: {row[1]} \nCodigo: {row[0]} Usuario: {row[2]} Contraseña: {row[3]}"  
-                mensaje2=f"Id_colonia: {row[4]} Colonia: {row[5]} \nLocalidad: {row[6]} Municipio: {row[7]} Estado: {row[8]}"
-                listaColonias.append(row[4])
-                imprimir(mensaje1,mensaje2,file)
-            totalColonias=len(listaColonias)
-            contadorColonias=0
-            colonias=""
-            if len(listaColonias) >1 :
-                for linea in listaColonias:
-                    if contadorColonias == totalColonias-1:
-                        colonias+=f"'{linea}'"
-                    else :
-                        colonias+=f"'{linea}',"
-                    contadorColonias+=1
-            else :
-                colonias=f"'{listaColonias[0]}'"
-            sql=f"select count(*) from funeraria_contrato_individual where idcolonia in({colonias});"
-            interfazSql.execute(sql) ##ejecutamos el sql    
-            registros2 = interfazSql.fetchall() ##vemos cuantos registros trae el sql
-            if len(registros2) != 0:
-                for row2 in registros2:
-                    mensaje1=f"numero de contratos: {row2[0]} \ntiene : {totalColonias} de colonias"
-                    imprimirUnaLinea(mensaje1,file)
-        else:
-            print ("registros no encontrados")
-    except mysql.connector.Error as err:
-        print(err)
-        print("Message", err.msg) '''
-
 def busquedaContratoApp(interfazSql,folio,baseDeDatos):
     os.system ("clear") 
     sql="""SELECT
