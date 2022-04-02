@@ -138,10 +138,14 @@ def modAplicacion(interfazSql,baseDeDatos):
     os.system ("clear") 
     datos = menuFunesBusqueda(baseDeDatos)
     print("Se a cambiado tu aplicacion a "+datos[0])
-    listasid=[78,93,121,135]
+    listasid=[78,93,121,135,254]
     for id in listasid:
-        sql="""UPDATE `gruposefi`.`apps_imei` SET `idempresa`='%s', `imei_iddb`='%s'
+        if(baseDeDatos!=13):
+            sql="""UPDATE `gruposefi`.`apps_imei` SET `idempresa`='%s', `imei_iddb`='%s'
          WHERE  `idseries`='%d';"""% (datos[2], datos[1],id) 
+        else :
+            sql="""UPDATE `gruposefi`.`apps_imei` SET `imei_iddb`='DEM'
+         WHERE  `idseries`='%d';"""% (id) 
         try:
             interfazSql.execute(sql)
         except mysql.connector.Error as err:

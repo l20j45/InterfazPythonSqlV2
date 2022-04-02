@@ -16,30 +16,12 @@ with open('abonos.txt', 'r') as f:
         parametros=linea.split("|")
         
         print(parametros)
-              
-        #sql ="INSERT INTO funeraria_abonos_individual SELECT '%s','%s','0',%d,'00:00:00','2020-00-00',0,0,0,0,%d,0,0,0,0,0,0,0,'QTNWYX4EFZFMKG','00:00:00','2021-00-00',0,0,'PMKYNNXAK0CHX','QWHSMOCYF2AZKT','0','0','1','1','1','1','1','1','1','1','1','0',0;" % (codigo,parametros[0],cantidadAbono,comisionPagada)
+        corte="CorteSnj"+str(contador)
         
-        sql ="INSERT INTO funeraria_abonos_individual SELECT '%s','%s','%s','%d','00:00:00','2021-11-01',0,0,0,0,'%s',0,0,0,0,0,'%s',0,'QWVIOWCUF2AZKT','19:13:22','2021-12-05',0,'%s','QWVIOS88F2AZKT','QWYI36BU9KVTQO','0','0','1','1','1','1','1','1','0','0','0','%s',0;" % (parametros[0],parametros[1],parametros[2],float(parametros[3]),parametros[4],parametros[5],parametros[6],parametros[7])
+        sql ="INSERT INTO funeraria_abonos_individual SELECT '%s','%s','%s','%d','00:00:00','2022-02-01',0,0,0,0,'%s',0,'%s',0,0,0,'%s',0,'S3NV878C9KVTQO','19:13:22','2022-02-01',0,'%s','PMKYNNXAK0CHX','QWYI36BU9KVTQO','0','0','1','1','1','1','1','1','0','0','0','%s',0;" % (parametros[0],parametros[1],parametros[2],float(parametros[3]),parametros[4],parametros[5],parametros[6],parametros[7],corte)
         
         
         contador+=1
         print(parametros)
         file.write(sql)
         file.write("\n")
-        
-
-
-
-"""         sql= parametro[1]
-        cur.execute(sql)    
-        registros = cur.fetchall()
-        if len(registros) != 0:
-            for row in registros:
-                mensaje ="contrato_: "+ str(parametro[0]) + " id_colonia_: " + str(row[0])
-                print(mensaje)
-                file.write(mensaje)
-                file.write("\n")
-        else:
-            print ("registros no encontrados")
-
-miConexion.close() """

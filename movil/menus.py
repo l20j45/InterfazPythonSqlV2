@@ -13,6 +13,7 @@ def MenuFunes():
     print("10.- tequila")
     print("11.- juchipila")
     print("12.- tabasco")
+    print("13.- DEMO")
     
 def MenuArchivoPrincipal():
     print("archivo p o principal")
@@ -79,6 +80,9 @@ def menuFunesBusqueda(baseDeDatos):
         return datos
     elif baseDeDatos == 12:
         datos = ["12.- tabasco", "TAB","QWVIOS88F2AZKT"]
+        return datos
+    elif baseDeDatos == 13:
+        datos = ["13.- DEMO", "DEM","DEMO"]
         return datos
     
 def imprimir(mensaje1, mensaje2,file):
