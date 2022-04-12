@@ -27,7 +27,7 @@ print("5.- La paz")
 listaValores = IngresarValores()
 
 file1 = open('AleatoriosAltasContratos.txt','w')
-listaSucursalPrefijo=['CAR','VHS-T-','PAR','VHS','COM','']
+listaSucursalPrefijo=['CAR','VHS-T-','PAR','VHS','COM','Modif']
 listaSucursalCodigo=['QWVIOTBYF2AZKT','S3OVUKO09KVTQO','S3OVUL3U9KVTQO','S3OVUL8K9KVTQO','S3OVUM349KVTQO','PM2S1QMO1WW8SPU']
 for x in range(listaValores[1]):
     status1 = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(length_of_string))

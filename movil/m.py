@@ -4,7 +4,7 @@ import consultas as consulta
 import mysql.connector
 import sys
 
-opciones = {"mod":1,"rutas":2,"contrato":3,"vista":4,"contratov":5}
+opciones = {"mod":1,"rutas":2,"contrato":3,"vista":4,"contratov":5,"abonos":6}
 
 def run():
     busqueda=opciones[sys.argv[2]]
@@ -26,6 +26,8 @@ def run():
         consulta.buscarEnVista(interfazSql,parametro,baseDeDatos)
     elif busqueda == 5:
         consulta.busquedaContratoVista(interfazSql,parametro,baseDeDatos)
+    elif busqueda == 6:
+        consulta.busquedaAbonos(interfazSql,parametro,baseDeDatos)
     cnx.close()
 if __name__ == '__main__':
     run()

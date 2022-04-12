@@ -6,6 +6,7 @@ import re
 
 listaEstatus={0:'Nuevo',1:'Firma',2:'Entregado',3:'Activo',4:'Suspendido',5:'Domicilio',6:'Cancelado',7:'Pagado',8:'Utilizado'}
 listaTipoDeCobranza={ 0 : 'Domicilio', 1 : 'Oficina'}
+funPruebas={13 : "DEM", 14 : "DEV", 15 : "DVL"}
 
 def busquedaFolio(interfazSql,folios,baseDeDatos):
     rango = False
@@ -140,12 +141,14 @@ def modAplicacion(interfazSql,baseDeDatos):
     print("Se a cambiado tu aplicacion a "+datos[0])
     listasid=[78,93,121,135,254]
     for id in listasid:
-        if(baseDeDatos!=13):
+        if(baseDeDatos not in [13,14,15]):
             sql="""UPDATE `gruposefi`.`apps_imei` SET `idempresa`='%s', `imei_iddb`='%s'
          WHERE  `idseries`='%d';"""% (datos[2], datos[1],id) 
         else :
-            sql="""UPDATE `gruposefi`.`apps_imei` SET `imei_iddb`='DEM'
-         WHERE  `idseries`='%d';"""% (id) 
+            
+            acceso=funPruebas[baseDeDatos]
+            sql="""UPDATE `gruposefi`.`apps_imei` SET `imei_iddb`='%s'
+         WHERE  `idseries`='%d';"""% (acceso,id)
         try:
             interfazSql.execute(sql)
         except mysql.connector.Error as err:
@@ -527,6 +530,80 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                         for row2 in registros2:
                             mensaje1=f"numero de contratos: {row2[0]} \ntiene : {totalColonias} de colonias"
                             imprimirUnaLinea(mensaje1,file)
+                else:
+                    print ("registros no encontrados")
+            except mysql.connector.Error as err:
+                print(err)
+                print("Message", err.msg)
+    except mysql.connector.Error as err:
+        print(err)
+        print("Message", err.msg)
+
+def busquedaAbonos(interfazSql,folio,baseDeDatos):
+    os.system ("clear") 
+    sql=f"""SELECT fci.Folio,fci.idcontrato_individual
+    from funeraria_contrato_individual fci
+    where fci.Folio like '%{folio}%';"""
+    print(sql)
+    try:
+        interfazSql.execute(sql) ##ejecutamos el sql    
+        registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+        # print(len(prueba)) imprimimos el numero de registros
+        datos=menuFunesBusqueda(baseDeDatos)
+        print(datos[0])
+        contador = 0
+        listaId=[]
+        listaPersona=[]
+        if len(registros) != 0:
+            print (f"\Folio Buscado:{folio}")
+            print("=====================================================")
+            for row in registros:
+                print(f"opcion {contador}: Folio : {row[0]} id : {row[1]}")
+                listaId.append(row[1])
+                listaPersona.append(row[0])
+                contador+=1
+            opcion=int(input("Que folio deseas buscar?: "))
+            idContrato=listaId[opcion]
+            nombreMostrar=listaPersona[opcion]
+            print(idContrato)
+            sql=f"""SELECT fci.Folio,fp.nombre_completo,fai.Abono,fai.bonificacion,fai.Fecha_Android,fai.Fecha_Oficina,
+            case
+                when fai.deleted = 0 THEN 'valido'
+                when fai.deleted = 1 THEN 'invalido'
+            end as Estatus
+            from funeraria_contrato_individual fci
+            left join funeraria_personal fp on fp.idpersonal = fci.idvendedor
+            LEFT JOIN funeraria_abonos_individual fai on fai.abonos_idcontrato_individual = fci.idcontrato_individual
+            where fci.idcontrato_individual = '{idContrato}';"""
+            print(sql)
+            try:
+                interfazSql.execute(sql) ##ejecutamos el sql    
+                registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+                # print(len(prueba)) imprimimos el numero de registros
+                datos=menuFunesBusqueda(baseDeDatos)
+                print(datos)
+                if len(registros) != 0:
+                    print (f"\Folio buscada:{nombreMostrar}")
+                    print("=====================================================\n")
+                    file = open('LocalidadesApp.txt','w')
+                    file.write(f"{datos[0]}\Folio buscada: {nombreMostrar}\n")            
+                    file.write("=====================================================\n")
+                    for row in registros:
+                        mensaje1=f"Contrato: {row[0]} \nVendedor: {row[1]} Abono: {float(row[2])} Bonificacion: {float(row[3])}"  
+                        mensaje2=f"fecha Android: {row[4]} Fecha Oficina: {row[5]} \nEstatus: {row[6]}"
+                        imprimir(mensaje1,mensaje2,file)  
+                        
+                    sql2=f"""SELECT fci.idcontrato_individual,fci.Folio, sum(fai.Abono+fai.bonificacion) as total, sum(fai.Abono) as Abonos,sum(fai.bonificacion) as Bonificacion, fci.limite_asignado as Funeraria, fci.pago_inicial
+                    from funeraria_contrato_individual fci
+                    LEFT JOIN funeraria_abonos_individual fai on fai.abonos_idcontrato_individual = fci.idcontrato_individual
+                    where fci.idcontrato_individual = '{idContrato}';"""
+                    interfazSql.execute(sql2) ##ejecutamos el sql    
+                    registros2 = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+                    if len(registros2) != 0:
+                        for row in registros2:
+                            mensaje1=f"idContrato: {row[0]} \nFolio: {row[1]} Total: {float(row[2])} Abonos: {float(row[3])} Bonificacion: {float(row[4])}"
+                            mensaje2=f"Funeraria: {float(row[5])} Pago Inicial: {float(row[6])}"
+                            imprimir(mensaje1,mensaje2,file)
                 else:
                     print ("registros no encontrados")
             except mysql.connector.Error as err:
