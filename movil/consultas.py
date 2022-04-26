@@ -139,7 +139,7 @@ def modAplicacion(interfazSql,baseDeDatos):
     os.system ("clear") 
     datos = menuFunesBusqueda(baseDeDatos)
     print("Se a cambiado tu aplicacion a "+datos[0])
-    listasid=[78,93,121,135,254]
+    listasid=[78,93,121,135,254,298,299]
     for id in listasid:
         if(baseDeDatos not in [13,14,15]):
             sql="""UPDATE `gruposefi`.`apps_imei` SET `idempresa`='%s', `imei_iddb`='%s'
@@ -589,20 +589,23 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
                     file.write(f"{datos[0]}\Folio buscada: {nombreMostrar}\n")            
                     file.write("=====================================================\n")
                     for row in registros:
-                        mensaje1=f"Contrato: {row[0]} \nVendedor: {row[1]} Abono: {float(row[2])} Bonificacion: {float(row[3])}"  
-                        mensaje2=f"fecha Android: {row[4]} Fecha Oficina: {row[5]} \nEstatus: {row[6]}"
-                        imprimir(mensaje1,mensaje2,file)  
+                        mensaje1=f"Vendedor: {row[1]}\nAbono: {float(row[2])} Bonificacion: {float(row[3])}"  
+                        mensaje2=f"fecha Android: {row[4]} Fecha Oficina: {row[5]} Estatus: {row[6]}"
+                        mensajeImp= mensaje1+mensaje2
+                        print(mensajeImp)
+                        soloArchivo(mensaje1,mensaje2,file)  
                         
-                    sql2=f"""SELECT fci.idcontrato_individual,fci.Folio, sum(fai.Abono+fai.bonificacion) as total, sum(fai.Abono) as Abonos,sum(fai.bonificacion) as Bonificacion, fci.limite_asignado as Funeraria, fci.pago_inicial
+                    sql2=f"""SELECT fci.idcontrato_individual,fci.Folio, sum(fai.Abono+fai.bonificacion) as total, sum(fai.Abono) as Abonos,sum(fai.bonificacion) as Bonificacion, fci.limite_asignado as Funeraria, fci.pago_inicial, count(fai.Abono) 
                     from funeraria_contrato_individual fci
                     LEFT JOIN funeraria_abonos_individual fai on fai.abonos_idcontrato_individual = fci.idcontrato_individual
                     where fci.idcontrato_individual = '{idContrato}';"""
+                    print("\n\n"+sql2+"\n\n")
                     interfazSql.execute(sql2) ##ejecutamos el sql    
                     registros2 = interfazSql.fetchall() ##vemos cuantos registros trae el sql
                     if len(registros2) != 0:
                         for row in registros2:
                             mensaje1=f"idContrato: {row[0]} \nFolio: {row[1]} Total: {float(row[2])} Abonos: {float(row[3])} Bonificacion: {float(row[4])}"
-                            mensaje2=f"Funeraria: {float(row[5])} Pago Inicial: {float(row[6])}"
+                            mensaje2=f"Funeraria: {float(row[5])} Pago Inicial: {float(row[6])} Total de abonos : {row[7]}"
                             imprimir(mensaje1,mensaje2,file)
                 else:
                     print ("registros no encontrados")

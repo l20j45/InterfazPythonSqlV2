@@ -49,52 +49,46 @@ def menuFunesBusqueda(baseDeDatos):
     datos = ["", ""]
     if baseDeDatos == 1:
         datos = ["1.- local", "prueba2","local"]
-        return datos
     elif baseDeDatos == 2:
-        datos = ["2.- Remoto Developer", "DVL","local"]
-        return datos
+        datos = ["2.- Remoto Developer", "DVL","local"]         
     elif baseDeDatos == 3:
-        datos = ["3.- sipref", "SIP","PMKYNNXAK0CHX"]
-        return datos
+        datos = ["3.- sipref", "SIP","PMKYNNXAK0CHX"]         
     elif baseDeDatos == 4:
-        datos = ["4.- vallarta", "prueba2","local"]
-        return datos
+        datos = ["4.- vallarta", "prueba2","local"]         
     elif baseDeDatos == 5:
         datos = ["5.- san jorge", "SJG","PNUSFF361BUKEB9"]
-        return datos
     elif baseDeDatos == 6:
-        datos = ["6.- zacatecas", "prueba2","local"]
-        return datos
+        datos = ["6.- zacatecas", "prueba2","local"]        
     elif baseDeDatos == 7:
         datos = ["7.- san gaspar", "SGP","PL6J4E10K0CHX"]
-        return datos
     elif baseDeDatos == 8:
         datos = ["8.- la paz", "PAZ","PM2S1LLK1WW8SPU"]
-        return datos
     elif baseDeDatos == 9:
         datos = ["9.- ixtlan", "IXT","PJRLAMD81S07ZH6"]
-        return datos
     elif baseDeDatos == 10:
         datos = ["10.- tequila", "TEQ","1"]
-        return datos
     elif baseDeDatos == 11:
         datos = ["11.- juchipila", "prueba2","local"]
-        return datos
     elif baseDeDatos == 12:
         datos = ["12.- tabasco", "TAB","QWVIOS88F2AZKT"]
-        return datos
     elif baseDeDatos == 13:
         datos = ["13.- DEMO", "DEM123","DEMO"]
     elif baseDeDatos == 14:
         datos = ["14.- Developer 1", "DEV123","DEVELOPER 1"]
     elif baseDeDatos == 15:
         datos = ["15.- Developer 2", "DVL123","DEVELOPER"]
-        return datos
+    return datos
     
 def imprimir(mensaje1, mensaje2,file):
     print(mensaje1)
     print(mensaje2)
     print("--------------------------------------------------------------------")
+    file.write(mensaje1)
+    file.write("\n")    
+    file.write(mensaje2)
+    file.write("\n-------------------------------------------------------\n")
+
+def soloArchivo(mensaje1, mensaje2,file):
     file.write(mensaje1)
     file.write("\n")    
     file.write(mensaje2)

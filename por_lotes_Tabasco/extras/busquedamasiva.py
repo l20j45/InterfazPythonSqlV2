@@ -3,11 +3,11 @@
 import mysql.connector
 
 miConexion = mysql.connector.connect( 
-                                     host='localhost', 
-                                     user= 'root', 
-                                     passwd='root', 
-                                     db='katana',
-                                     port=3319)
+                                     host='www.kitaokatechdb.online', 
+                                     user= 'fune_angelessur', 
+                                     passwd='fune_angelessur123', 
+                                     db='hanbai_fune_angelessureste',
+                                     port=3306)
 
 cur = miConexion.cursor()
 file = open('selectMasivoEncontrado.txt','w')
