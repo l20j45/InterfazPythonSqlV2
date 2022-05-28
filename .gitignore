@@ -132,6 +132,7 @@ dmypy.json
 *.txt
 prueba*
 conexionlocal.py
+Preloader*
 .conexion.py.swp
 ..gitignore.swp
 nohup.out

@@ -1,3 +1,4 @@
+from datetime import date, datetime, timedelta
 from menus import *
 import os
 from urllib.parse import quote
@@ -7,6 +8,9 @@ import re
 listaEstatus={0:'Nuevo',1:'Firma',2:'Entregado',3:'Activo',4:'Suspendido',5:'Domicilio',6:'Cancelado',7:'Pagado',8:'Utilizado'}
 listaTipoDeCobranza={ 0 : 'Domicilio', 1 : 'Oficina'}
 funPruebas={13 : "DEM", 14 : "DEV", 15 : "DVL"}
+listaFunerariasdb={0:'TEQ',1:'IXT',2:'SGP',3:'PAZ',4:'SIP',5:'SJG',6:'TAB',7:'SOC'}
+listaFunerariasidEmpresa={0:'1',1:'PJRLAMD81S07ZH6',2:'SGP',3:'PM2S1LLK1WW8SPU',4:'PMKYNNXAK0CHX',5:'PNUSFF361BUKEB9',6:'QWVIOS88F2AZKT',7:'SOC'}
+
 
 def busquedaFolio(interfazSql,folios,baseDeDatos):
     rango = False
@@ -139,13 +143,12 @@ def modAplicacion(interfazSql,baseDeDatos):
     os.system ("clear") 
     datos = menuFunesBusqueda(baseDeDatos)
     print("Se a cambiado tu aplicacion a "+datos[0])
-    listasid=[78,93,121,135,254,298,299]
+    listasid=[78,93,121,135,254,298,299,306,307,308]
     for id in listasid:
         if(baseDeDatos not in [13,14,15]):
             sql="""UPDATE `gruposefi`.`apps_imei` SET `idempresa`='%s', `imei_iddb`='%s'
          WHERE  `idseries`='%d';"""% (datos[2], datos[1],id) 
         else :
-            
             acceso=funPruebas[baseDeDatos]
             sql="""UPDATE `gruposefi`.`apps_imei` SET `imei_iddb`='%s'
          WHERE  `idseries`='%d';"""% (acceso,id)
@@ -567,14 +570,16 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
             nombreMostrar=listaPersona[opcion]
             print(idContrato)
             sql=f"""SELECT fci.Folio,fp.nombre_completo,fai.Abono,fai.bonificacion,fai.Fecha_Android,fai.Fecha_Oficina,
-            case
+            CASE
                 when fai.deleted = 0 THEN 'valido'
                 when fai.deleted = 1 THEN 'invalido'
-            end as Estatus
-            from funeraria_contrato_individual fci
-            left join funeraria_personal fp on fp.idpersonal = fci.idvendedor
+            END as Estatus
+            FROM funeraria_contrato_individual fci
+            LEFT JOIN funeraria_personal fp on fp.idpersonal = fci.idvendedor
             LEFT JOIN funeraria_abonos_individual fai on fai.abonos_idcontrato_individual = fci.idcontrato_individual
-            where fci.idcontrato_individual = '{idContrato}';"""
+            WHERE fci.idcontrato_individual = '{idContrato}'
+            ORDER BY fai.Fecha_Android;"""
+            listaVendedores=[]
             print(sql)
             try:
                 interfazSql.execute(sql) ##ejecutamos el sql    
@@ -589,12 +594,13 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
                     file.write(f"{datos[0]}\Folio buscada: {nombreMostrar}\n")            
                     file.write("=====================================================\n")
                     for row in registros:
-                        mensaje1=f"Vendedor: {row[1]}\nAbono: {float(row[2])} Bonificacion: {float(row[3])}"  
-                        mensaje2=f"fecha Android: {row[4]} Fecha Oficina: {row[5]} Estatus: {row[6]}"
+                        listaVendedores.append(row[1])
+                        mensaje1=f"Abono: {float(row[2])} Bonificacion: {float(row[3])}"  
+                        mensaje2=f" fecha cobro: {row[4]} Fecha Recepcion: {row[5]} Estatus: {row[6]}"
                         mensajeImp= mensaje1+mensaje2
                         print(mensajeImp)
                         soloArchivo(mensaje1,mensaje2,file)  
-                        
+                    print("\nVendedores: \n" , listaVendedores)
                     sql2=f"""SELECT fci.idcontrato_individual,fci.Folio, sum(fai.Abono+fai.bonificacion) as total, sum(fai.Abono) as Abonos,sum(fai.bonificacion) as Bonificacion, fci.limite_asignado as Funeraria, fci.pago_inicial, count(fai.Abono) 
                     from funeraria_contrato_individual fci
                     LEFT JOIN funeraria_abonos_individual fai on fai.abonos_idcontrato_individual = fci.idcontrato_individual
@@ -615,3 +621,139 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
     except mysql.connector.Error as err:
         print(err)
         print("Message", err.msg)
+
+def busquedaAbonosCobrador(interfazSql,folio,baseDeDatos):
+    os.system ("clear") 
+    sql=f"""select concat_ws(' ',Nombre,Paterno,Materno) as nombreCompleto, idpersonal
+from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{folio}%' or idpersonal like '%{folio}%'"""
+    print(sql)
+    try:
+        interfazSql.execute(sql) ##ejecutamos el sql    
+        registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+        # print(len(prueba)) imprimimos el numero de registros
+        datos=menuFunesBusqueda(baseDeDatos)
+        print(datos[0])
+        contador = 0
+        listaId=[]
+        listaPersona=[]
+        if len(registros) != 0:
+            print (f"\Persona buscada Buscado:{folio}")
+            print("=====================================================")
+            for row in registros:
+                print(f"opcion {contador}: persona : {row[0]} id : {row[1]}")
+                listaId.append(row[1])
+                listaPersona.append(row[0])
+                contador+=1
+            opcion=int(input("Que persona deseas buscar?: "))
+            idpersonal=listaId[opcion]
+            nombreMostrar=listaPersona[opcion]
+            fecha =input("Ingresa la fecha que deseas buscar: ")
+            if fecha=="1":
+                fechaFormateada=date.today()
+            else :
+                fechaFormateada=datetime.strptime(fecha, '%Y-%m-%d')
+            diasAtras= int( input("cuantos dias antes: "))
+            FechaAnterior = fechaFormateada - timedelta(days=diasAtras)
+            print(idpersonal)
+            sql=f"""SELECT fp.idpersonal,fp.nombre_completo,oaai.idabono_individual,oaai.Folio,oaai.Abono,oaai.Fecha_pago,oaai.cobrado_oficina
+            from funeraria_personal fp
+            left join online_android_abonos_individual oaai on oaai.idcobrador = fp.idpersonal
+            where idpersonal = "{idpersonal}" and oaai.Fecha_pago between '{FechaAnterior.strftime("%Y-%m-%d")} '  and '{fechaFormateada.strftime("%Y-%m-%d")} '
+            order by Fecha_pago desc;"""
+            print(sql)
+            try:
+                interfazSql.execute(sql) ##ejecutamos el sql    
+                registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+                # print(len(prueba)) imprimimos el numero de registros
+                datos=menuFunesBusqueda(baseDeDatos)
+                listaColonias = []
+                print(datos)
+                if len(registros) != 0:
+                    print (f"\npersona buscada:{nombreMostrar}")
+                    print("=====================================================\n")
+                    file = open('AbonosDados.txt','w')
+                    file.write(f"{datos[0]}\npersona buscada: {nombreMostrar}\n")            
+                    file.write("=====================================================\n")
+                    contador=0
+                    total = 0
+                    for row in registros:
+                        if row[6] == 0:
+                            status="no cobrado"
+                        else :
+                            status = "Cobrado" 
+                        mensaje1=f"IdAbono: {row[2][-10:]} Folio: {row[3]} Abono: {row[4]:,.2f} Fecha: {row[5]} CobradorOficina: {status}"  
+                        imprimirUnaLinea(mensaje1,file)
+                        contador+=1
+                        total+=row[4]
+                    print(f"\nhubo {contador} abonos en android online con un total de {total:,.2f} ") 
+                else:
+                    print ("registros no encontrados")
+            except mysql.connector.Error as err:
+                print(err)
+                print("Message", err.msg)
+            sql=f"""SELECT fp.idpersonal,fp.nombre_completo,fci.idabono,fci.abonos_idcontrato_individual,fci.Fecha_Android,fci.Abono,fci.bonificacion,fci.idcorte_cobros
+            from funeraria_personal fp
+            left join funeraria_abonos_individual fci on fci.idcobrador = fp.idpersonal
+            where idpersonal = "{idpersonal}" and fci.Fecha_Android between '{FechaAnterior.strftime("%Y-%m-%d")}'  and '{fechaFormateada.strftime("%Y-%m-%d")}'
+            order by Fecha_Android desc;"""
+            print(sql)
+            try:
+                interfazSql.execute(sql) ##ejecutamos el sql    
+                registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+                # print(len(prueba)) imprimimos el numero de registros
+                datos=menuFunesBusqueda(baseDeDatos)
+                listaColonias = []
+                print(datos)
+                if len(registros) != 0:
+                    print (f"\npersona buscada:{nombreMostrar}")
+                    print("=====================================================\n")
+                    file = open('AbonosDados.txt','a')
+                    file.write(f"{datos[0]}\npersona buscada: {nombreMostrar}\n")            
+                    file.write("=====================================================\n")
+                    contador=0
+                    totalAbonos = 0
+                    totalBonificacion = 0
+                    for row in registros:
+                        mensaje1=f"IdAbono: {row[2][-10:]} Folio: {row[3][-5:]} Fecha: {row[4]} Abono: {row[5]:,.2f} Bonificacion: {row[6]:,.2f} idcorte : {row[7]}"  
+                        imprimirUnaLinea(mensaje1,file)
+                        contador+=1
+                        totalAbonos+=row[5]
+                        totalBonificacion+=row[6]
+                    print(f"\nhubo {contador} abonos en recibidos con un total de {totalAbonos:,.2f} y una bonificacion total de total de {totalBonificacion:,.2f} ") 
+                else:
+                    print ("registros no encontrados")
+            except mysql.connector.Error as err:
+                print(err)
+                print("Message", err.msg)
+    except mysql.connector.Error as err:
+        print(err)
+        print("Message", err.msg)
+        
+def agregarPersona(interfazSql,cnx):
+    os.system ("clear") 
+    listaFunerariasdb={0:'TEQ',1:'IXT',2:'SGP',3:'PAZ',4:'SIP',5:'SJG',6:'TAB',7:'SOC'}
+    print("0.- Tequila")
+    print("1.- Ixtlan")
+    print("2.- San gaspar")
+    print("3.- La paz")
+    print("4.- Sipref")
+    print("5.- San jorge")
+    print("6.- Tabasco")
+    print("7.- Socorro")
+    opcion=int(input("cual es la funeraria a la que deseas dar de alta?: "))
+    nombrePersona=input("a quien daras de alta?: ")
+    imei=input("cual es su imei?: ")
+    app=input("en que app necesitas? 0 0 cobranza 1 = ventas 2 = logistica: ")
+    db=listaFunerariasdb[opcion]
+    empresa=listaFunerariasidEmpresa[opcion]
+    fechaFormateada=date.today()
+    sql=f"""INSERT INTO `gruposefi`.`apps_imei` (`idempresa`, `Serie`, `Descripcion`, `Fecha_Inicio`, `Fecha_Vigencia`, `imei_iddb`, `id_app`) 
+    VALUES ('{empresa}', '{imei}', '{nombrePersona}', '{fechaFormateada}', '2030-12-31', '{db}', '{app}');"""
+    try:
+        interfazSql.execute(sql)
+        cnx.commit()
+        print("dado de alta")
+    except mysql.connector.Error as err:
+        print(err)
+        print("Message", err.msg)
+        
