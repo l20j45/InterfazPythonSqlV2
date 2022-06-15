@@ -1,4 +1,5 @@
 from termcolor import colored, cprint
+import csv
 
 def MenuFunes():
     print("1.- local")
@@ -43,7 +44,19 @@ def MenuArchivoMovil():
     cprint("2 movil (nombre del personal) rutas", 'red')
     print("busca las rutas o lugares que el personal tiene asignadas en\n")
     cprint("3 movil (folio del contrato) contrato", 'red')
-    print("busca el contrato y devuelve a que colonia esta asignada y que cobrador lo tiene asignado")
+    print("busca el contrato y devuelve a que colonia esta asignada y que cobrador lo tiene asignado\n")
+    cprint("4 movil (folio del contrato) vista", 'red')
+    print("devuelve todos los contratos que tiene en vista un cobrador\n")
+    cprint("5 movil (folio del contrato) contratov", 'red')
+    print("busca el contrato y devuelve a que colonia esta asignada y que cobrador lo tiene asignado en la tabla de vistas\n")
+    cprint("6 movil (folio del contrato) abonos", 'red')
+    print("devuelve los abonos que tiene un contrato\n")
+    cprint("7 movil (folio del contrato) abonosrecibidos", 'red')
+    print("devuelve los abonos que haya dado un cobrador en una fecha predeterminada\n")
+    cprint("8 movil 1 alta", 'red')
+    print("te pide los datos como nombre, imei, empresa para poder darlos de alta en la tabla de imeis\n")
+
+
 
 def menuFunesBusqueda(baseDeDatos):
     datos = ["", ""]
@@ -106,3 +119,10 @@ def imprimirRojo(mensaje1, mensaje2,file):
 def imprimirUnaLinea(mensaje1,file):
     print(mensaje1)
     file.write(mensaje1)
+    
+def guardarCsv(nombre,encabezado: list,registros):
+    fileCsv = open(nombre+".csv", 'w')
+    myFile = csv.writer(fileCsv)
+    myFile.writerow(encabezado)
+    myFile.writerows(registros)
+    fileCsv.close()

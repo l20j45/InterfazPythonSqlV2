@@ -130,6 +130,7 @@ dmypy.json
 
 
 *.txt
+*.csv
 prueba*
 conexionlocal.py
 Preloader*

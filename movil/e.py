@@ -5,7 +5,7 @@ import consultas as consulta
 import mysql.connector
 import sys
 
-opciones = {"permisos":1,"usuarioSys":2,"personal":2,"cruzado":3,"modificar":5,"modificarfolio":6}
+opciones = {"permisos":1,"usuarioSys":2,"verModulos":3,"cruzado":3,"modificar":5,"modificarfolio":6}
 
 def run():
     busqueda=opciones[sys.argv[2]]
@@ -17,7 +17,9 @@ def run():
     if busqueda == 1:
         consulta.verPermisos(interfazSql,parametro,baseDeDatos) 
     elif busqueda == 2:
-        consulta.verUsuarioSistema(interfazSql,parametro,baseDeDatos) 
+        consulta.verUsuarioSistema(interfazSql,parametro,baseDeDatos)
+    elif busqueda == 3:
+        consulta.verModulosPersonas(interfazSql,parametro,baseDeDatos) 
 
      
     cnx.close()

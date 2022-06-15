@@ -5,6 +5,7 @@ from urllib.parse import quote
 import mysql.connector
 import re
 
+
 listaEstatus={0:'Nuevo',1:'Firma',2:'Entregado',3:'Activo',4:'Suspendido',5:'Domicilio',6:'Cancelado',7:'Pagado',8:'Utilizado'}
 listaTipoDeCobranza={ 0 : 'Domicilio', 1 : 'Oficina'}
 funPruebas={13 : "DEM", 14 : "DEV", 15 : "DVL"}
@@ -82,10 +83,10 @@ def busquedaFolioContrato(interfazSql,folio,baseDeDatos):
 
 def busquedaPersonal(interfazSql,nombre,baseDeDatos):
     os.system ("clear") 
-    sql="""SELECT  concat_ws(" ",FP.Nombre, FP.Paterno, FP.Materno) as nombre,FP.idpersonal,FP.usuario, FP.clave,ss.station
+    sql=f"""SELECT concat_ws(" ",FP.Nombre, FP.Paterno, FP.Materno) as nombre,FP.idpersonal,FP.usuario, FP.clave,ss.station
         FROM funeraria_personal FP
         LEFT join system_station ss on ss.idstation=FP.idsucursal
-        WHERE concat_ws(" ",Nombre, Paterno, Materno) like "%%%s%%"; """ % (nombre)
+        WHERE concat_ws(" ",Nombre, Paterno, Materno) like "%%{nombre}%%";"""
     print(sql)
     try:
         interfazSql.execute(sql) ##ejecutamos el sql    
@@ -111,10 +112,10 @@ def busquedaPersonal(interfazSql,nombre,baseDeDatos):
         
 def busquedaCruzada(interfazSql,nombre,baseDeDatos):
     os.system ("clear")
-    sql="""SELECT fp.idpersonal, concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) as nombreCompleto ,a.idagente_folio, a.folio, a.status_folio
+    sql=f"""SELECT fp.idpersonal, concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) as nombreCompleto ,a.idagente_folio, a.folio, a.status_folio
     from funeraria_personal fp
     inner join funeraria_agente_folios a on a.idpersonal = fp.idpersonal
-    where concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) like "%%%s%%" and a.status_folio=0 ORDER BY a.fecha , a.folio; """ % (nombre)
+    where concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) like "%%{nombre}%%" or fp.usuario like '%{nombre}%'  and a.status_folio=0 ORDER BY a.fecha , a.folio; """ 
     print(sql)
     try:
         interfazSql.execute(sql) ##ejecutamos el sql    
@@ -307,7 +308,7 @@ LEFT JOIN funeraria_administracion_acciones_campos faac ON faac.idaccion_campo =
 LEFT JOIN funeraria_administracion_acciones faa ON faac.idaccion_modulo = faa.idaccion_modulo
 LEFT JOIN system_station ss ON ss.idstation = faacu.idsucursal
 WHERE full_name like '%{nombre}%'
-ORDER BY faacu.idaccion_campo,faacu.estatus DESC;"""
+ORDER BY ss.station,faacu.idaccion_campo,faacu.estatus DESC;"""
     print(sql)
     try:
         interfazSql.execute(sql) ##ejecutamos el sql    
@@ -463,7 +464,7 @@ def busquedaContratoVista(interfazSql,folio,baseDeDatos):
 def busquedaRutas(interfazSql,folio,baseDeDatos):
     os.system ("clear") 
     sql=f"""select concat_ws(' ',Nombre,Paterno,Materno) as nombreCompleto, idpersonal
-from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{folio}%' or idpersonal like '%{folio}%'"""
+from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{folio}%' or idpersonal like '%{folio}%' or usuario like '%{folio}%';"""
     print(sql)
     try:
         interfazSql.execute(sql) ##ejecutamos el sql    
@@ -601,7 +602,7 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
                         print(mensajeImp)
                         soloArchivo(mensaje1,mensaje2,file)  
                     print("\nVendedores: \n" , listaVendedores)
-                    sql2=f"""SELECT fci.idcontrato_individual,fci.Folio, sum(fai.Abono+fai.bonificacion) as total, sum(fai.Abono) as Abonos,sum(fai.bonificacion) as Bonificacion, fci.limite_asignado as Funeraria, fci.pago_inicial, count(fai.Abono) 
+                    sql2=f"""SELECT fci.idcontrato_individual,fci.Folio, sum(fai.Abono+fai.bonificacion) as total, sum(fai.Abono) as Abonos,sum(fai.bonificacion) as Bonificacion, fci.limite_asignado as Funeraria, fci.pago_inicial, count(fai.Abono),fci.precio_paquete
                     from funeraria_contrato_individual fci
                     LEFT JOIN funeraria_abonos_individual fai on fai.abonos_idcontrato_individual = fci.idcontrato_individual
                     where fci.idcontrato_individual = '{idContrato}';"""
@@ -610,7 +611,7 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
                     registros2 = interfazSql.fetchall() ##vemos cuantos registros trae el sql
                     if len(registros2) != 0:
                         for row in registros2:
-                            mensaje1=f"idContrato: {row[0]} \nFolio: {row[1]} Total: {float(row[2])} Abonos: {float(row[3])} Bonificacion: {float(row[4])}"
+                            mensaje1=f"idContrato: {row[0]} \nFolio: {row[1]} Costo paquete : {float(row[8])} restante : {float(row[8])-float(row[2])-float(row[6])}\nTotal: {float(row[2])} Abonos: {float(row[3])} Bonificacion: {float(row[4])} "
                             mensaje2=f"Funeraria: {float(row[5])} Pago Inicial: {float(row[6])} Total de abonos : {row[7]}"
                             imprimir(mensaje1,mensaje2,file)
                 else:
@@ -625,7 +626,7 @@ def busquedaAbonos(interfazSql,folio,baseDeDatos):
 def busquedaAbonosCobrador(interfazSql,folio,baseDeDatos):
     os.system ("clear") 
     sql=f"""select concat_ws(' ',Nombre,Paterno,Materno) as nombreCompleto, idpersonal
-from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{folio}%' or idpersonal like '%{folio}%'"""
+from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{folio}%' or idpersonal like '%{folio}%' or usuario like '%{folio}%'"""
     print(sql)
     try:
         interfazSql.execute(sql) ##ejecutamos el sql    
@@ -655,11 +656,11 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
             diasAtras= int( input("cuantos dias antes: "))
             FechaAnterior = fechaFormateada - timedelta(days=diasAtras)
             print(idpersonal)
-            sql=f"""SELECT fp.idpersonal,fp.nombre_completo,oaai.idabono_individual,oaai.Folio,oaai.Abono,oaai.Fecha_pago,oaai.cobrado_oficina
+            sql=f"""SELECT fp.idpersonal,fp.nombre_completo,oaai.idabono_individual,oaai.Folio,oaai.Abono,oaai.Fecha_pago,oaai.cobrado_oficina,oaai.Hora_pago
             from funeraria_personal fp
             left join online_android_abonos_individual oaai on oaai.idcobrador = fp.idpersonal
             where idpersonal = "{idpersonal}" and oaai.Fecha_pago between '{FechaAnterior.strftime("%Y-%m-%d")} '  and '{fechaFormateada.strftime("%Y-%m-%d")} '
-            order by Fecha_pago desc;"""
+            order by Fecha_pago desc ,oaai.Hora_pago;"""
             print(sql)
             try:
                 interfazSql.execute(sql) ##ejecutamos el sql    
@@ -678,10 +679,10 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                     total = 0
                     for row in registros:
                         if row[6] == 0:
-                            status="no cobrado"
+                            status="No recepcionado"
                         else :
-                            status = "Cobrado" 
-                        mensaje1=f"IdAbono: {row[2][-10:]} Folio: {row[3]} Abono: {row[4]:,.2f} Fecha: {row[5]} CobradorOficina: {status}"  
+                            status = "Recepcionado" 
+                        mensaje1=f"IdAbono: {row[2][-10:]} Folio: {row[3]} Abono: {row[4]:,.2f} Fecha: {row[5]} Hora registrado: {row[7]} {status}"  
                         imprimirUnaLinea(mensaje1,file)
                         contador+=1
                         total+=row[4]
@@ -731,24 +732,22 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
         
 def agregarPersona(interfazSql,cnx):
     os.system ("clear") 
-    listaFunerariasdb={0:'TEQ',1:'IXT',2:'SGP',3:'PAZ',4:'SIP',5:'SJG',6:'TAB',7:'SOC'}
-    print("0.- Tequila")
-    print("1.- Ixtlan")
-    print("2.- San gaspar")
-    print("3.- La paz")
-    print("4.- Sipref")
-    print("5.- San jorge")
-    print("6.- Tabasco")
-    print("7.- Socorro")
+
+    listaFunerarias={0:'Tequila',1:'Ixtlan',2:'San gaspar',3:'La paz',4:'Sipref',5:'San jorge',6:'Tabasco',7:'Socorro'}
+    for element in listaFunerarias:
+        print(f"{element}.- {listaFunerarias[element]}")
     opcion=int(input("cual es la funeraria a la que deseas dar de alta?: "))
+    print(f"seleccionaste esta funeraria {listaFunerarias[opcion]} ")
     nombrePersona=input("a quien daras de alta?: ")
     imei=input("cual es su imei?: ")
     app=input("en que app necesitas? 0 0 cobranza 1 = ventas 2 = logistica: ")
     db=listaFunerariasdb[opcion]
     empresa=listaFunerariasidEmpresa[opcion]
     fechaFormateada=date.today()
+    fechaFormateada = fechaFormateada - timedelta(days=1)
     sql=f"""INSERT INTO `gruposefi`.`apps_imei` (`idempresa`, `Serie`, `Descripcion`, `Fecha_Inicio`, `Fecha_Vigencia`, `imei_iddb`, `id_app`) 
     VALUES ('{empresa}', '{imei}', '{nombrePersona}', '{fechaFormateada}', '2030-12-31', '{db}', '{app}');"""
+    print(sql)
     try:
         interfazSql.execute(sql)
         cnx.commit()
@@ -756,4 +755,77 @@ def agregarPersona(interfazSql,cnx):
     except mysql.connector.Error as err:
         print(err)
         print("Message", err.msg)
-        
+
+
+def verModulosPersonas(interfazSql,folio,baseDeDatos):
+    os.system ("clear") 
+    sql=f"""select full_name,iduser 
+from system_users
+where full_name like '%{folio}%' or iduser like '%{folio}%';"""
+    print(sql)
+    try:
+        interfazSql.execute(sql) ##ejecutamos el sql    
+        registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+        # print(len(prueba)) imprimimos el numero de registros
+        datos=menuFunesBusqueda(baseDeDatos)
+        print(datos[0])
+        contador = 0
+        listaId=[]
+        listaPersona=[]
+        if len(registros) != 0:
+            print (f"\Persona buscada Buscado:{folio}")
+            print("=====================================================")
+            for row in registros:
+                print(f"opcion {contador}: persona : {row[0]} id : {row[1]}")
+                listaId.append(row[1])
+                listaPersona.append(row[0])
+                contador+=1
+            opcion=int(input("Que persona deseas buscar?: "))
+            idpersonal=listaId[opcion]
+            nombreMostrar=listaPersona[opcion]
+            print(idpersonal)
+            
+            sql=f"""SELECT su.full_name,su.username,su.password,ss.station,sl.title,sm.title,sp.record,sp.remove,sp.edit,sp.list
+            from system_users su
+            left join system_privileges sp on su.iduser = sp.iduser
+            left join system_modules sm on sp.idmodule = sm.idmodule
+            left join system_station ss on ss.idstation = sp.idstation
+            left join system_layer_module slm on sm.idmodule = slm.idmodule
+            left join system_layer sl on slm.idlayer = sl.idlayer
+            WHERE su.iduser="QYDLK07Y9KVTQO"
+            order by ss.station,sl.title;"""
+            print(sql)
+            try:
+                interfazSql.execute(sql) ##ejecutamos el sql    
+                registros = interfazSql.fetchall() ##vemos cuantos registros trae el sql
+                # print(len(prueba)) imprimimos el numero de registros
+                datos=menuFunesBusqueda(baseDeDatos)
+                listaColonias = []
+                print(datos)
+                if len(registros) != 0:
+                    print (f"\npersona buscada:{nombreMostrar}")
+                    print("=====================================================\n")
+                    file = open('modulosPersona.txt','w')
+                    file.write(f"{datos[0]}\npersona buscada: {nombreMostrar}\n")            
+                    file.write("=====================================================\n")
+                    contador=0
+                    guardarCsv("modulosPersona",["nombre completo","usuario","password","sucursal","agrupador","modulo","guardar","borrar","editar","ver"],registros)                    
+                    for row in registros:
+                        permisoAgregar = "agregar" if row[6]=="1" else "";
+                        permisoBorrar = "Borrar" if row[7]=="1" else "";
+                        permisoEditar = "Editar" if row[8]=="1" else "";
+                        permisoVer = "Ver" if row[9]=="1" else "";
+
+                        mensaje1=f"Persona encontrada: {row[0]} \nUsuario: {row[1]} Contraseña: {row[2]} sucursal: {row[3]}"  
+                        mensaje2=f"Agrupador: {row[4]} modulo: *{row[5]}* \nPermisos: {permisoAgregar} {permisoBorrar} {permisoEditar} {permisoVer}"
+                        imprimir(mensaje1,mensaje2,file)
+                    file.close()
+                        
+                else:
+                    print ("registros no encontrados")
+            except mysql.connector.Error as err:
+                print(err)
+                print("Message", err.msg)
+    except mysql.connector.Error as err:
+        print(err)
+        print("Message", err.msg)
