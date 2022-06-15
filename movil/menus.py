@@ -126,3 +126,28 @@ def guardarCsv(nombre,encabezado: list,registros):
     myFile.writerow(encabezado)
     myFile.writerows(registros)
     fileCsv.close()
+
+def guardarCsvAppend(nombre,encabezado: list,registros):
+    fileCsv = open(nombre+".csv", 'a')
+    myFile = csv.writer(fileCsv)
+    myFile.writerow(encabezado)
+    myFile.writerows(registros)
+    fileCsv.close()
+
+def guardarCsvAppendContenido(nombre,registros):
+    fileCsv = open(nombre+".csv", 'a')
+    myFile = csv.writer(fileCsv)
+    myFile.writerows(registros)
+    fileCsv.close()
+
+def guardarCsvAppendColumna(nombre,contenido:list):
+    fileCsv = open(nombre+".csv", 'a')
+    myFile = csv.writer(fileCsv)
+    myFile.writerows(contenido)
+    fileCsv.close()
+    
+def guardarCsvEncabezado(nombre,encabezado: list):
+    fileCsv = open(nombre+".csv", 'w')
+    myFile = csv.writer(fileCsv)
+    myFile.writerow(encabezado)
+    fileCsv.close()

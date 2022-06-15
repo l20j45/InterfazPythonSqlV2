@@ -2,7 +2,7 @@ import conexionlocal as connect
 import menus as menu
 import consultas as consulta
 
-import mysql.connector
+
 import sys
 
 opciones = {"permisos":1,"usuarioSys":2,"verModulos":3,"cruzado":3,"modificar":5,"modificarfolio":6}
