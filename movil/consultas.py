@@ -201,21 +201,37 @@ def busquedaContratoApp(interfazSql, folio, baseDeDatos):
     sql = f"""SELECT FCI.idcontrato_individual,FCI.Folio,
        case FCI.Estatus
          WHEN '0' THEN "Nuevo"
-					WHEN  1 THEN "Firma"
-					WHEN  2 THEN "Entregado"
-					WHEN  3 THEN "Activo"
-					WHEN  4 THEN "Suspendido"
-					WHEN  5 THEN "Esperando devolucion"
-					WHEN  6 THEN "Cancelado"
-					WHEN  7 THEN "Pagado"
-					WHEN  8 THEN "Utilizado"
-					END AS Estatus,
+                                        WHEN  1 THEN "Firma"
+                                        WHEN  2 THEN "Entregado"
+                                        WHEN  3 THEN "Activo"
+                                        WHEN  4 THEN "Suspendido"
+                                        WHEN  5 THEN "Esperando devolucion"
+                                        WHEN  6 THEN "Cancelado"
+                                        WHEN  7 THEN "Pagado"
+                                        WHEN  8 THEN "Utilizado"
+                                        END AS Estatus,
        FCI.Nombre, FCI.Apellido_Paterno, FCI.Apellido_Materno, FCI.latitud,FCI.longitud, FCI.idcolonia,FC.Colonia, FCCC.idpersonal,FP.nombre_completo, FP.usuario, FP.clave, FCI.Fecha, FCI.Monto_Liquidado, FCI.Saldo_Deudor,
        case FCI.Tipo_Cobranza
          WHEN '0' THEN "Domicilio"
-					WHEN  1 THEN "Oficina"
-					END AS tipo_cobranza,
-       FCI.pago_programado
+                                        WHEN  1 THEN "Oficina"
+                                        END AS tipo_cobranza,
+       FCI.pago_programado,
+		 case FCI.Plan_de_Pago
+                                        WHEN  0 THEN "Semanal"
+                                        WHEN  1 THEN "Quincenal"
+                                        WHEN  2 THEN "Mensual"
+                                        WHEN  3 THEN "CADA 2 MESES"
+                                        WHEN  4 THEN "CADA 3 MESES"
+                                        WHEN  5 THEN "CADA 4 MESES"
+                                        WHEN  6 THEN "CADA 5 MESES"
+                                        WHEN  7 THEN "CADA 6 MESES"
+                                        WHEN  8 THEN "CADA 7 MESES"
+                                        WHEN  9 THEN "CADA 8 MESES"
+                                        WHEN  10 THEN "CADA 9 MESES"
+                                        WHEN  11 THEN "CADA 10 MESES"
+                                        WHEN  12 THEN "CADA 11 MESES"
+                                        WHEN  13 THEN "anual"
+                                        END AS Plan_de_pago, FCI.dia_cobro
 from funeraria_contrato_individual FCI
          left join funeraria_colonia FC
                    on FCI.idcolonia = FC.idcolonia
@@ -239,12 +255,12 @@ where FCI.FOLIO LIKE "%{folio}%";"""
             file.write("=====================================================")
             encabezado = ['idcontrato_individual','Folio','etatus',
        'Nombre','Apellido_Paterno', 'Apellido_Materno', 'latitud','longitud','idcolonia','Colonia','idpersonal','nombre_completo','usuario','clave', 'Fecha','Monto_Liquidado','Saldo_Deudor',
-       'Tipo_Cobranza', 'pago_programado']
+       'Tipo_Cobranza', 'pago_programado', 'dia de cobranza', 'dias de cobro']
             guardarCsv("ContratosApp", encabezado, registros)
             for row in registros:
 
-                mensaje1 = f"Folio encontrado: {row[1]} \nFecha contrato: {row[14]} fecha del proximo pago: {row[18]} \nCodigo contrato: {row[0]} Estatus: {row[2]}\nTipo de cobranza: {row[17]}  Monto liquidado: {round(row[15],2)} Saldo deudo: {round(row[16],2)} \nNombre del Cliente: {row[3]} {row[4]} {row[5]}"
-                mensaje2 = f"Latitud {row[6]} Longitud {row[7]} \nId_colonia: {row[8]} Colonia: {row[9]} \nidPersonal: {row[10]} Nombre personal: {row[11]} Usuario: {row[12]} clave: {row[13]}"
+                mensaje1 = f"Folio encontrado: {row[1]}\nPeriodicidad de cobranza: {row[19]} Dias de cobranza: {row[20]} \nFecha contrato: {row[14]} fecha del proximo pago: {row[18]} \nCodigo contrato: {row[0]} Estatus: {row[2]}\nTipo de cobranza: {row[17]}  Monto liquidado: {round(row[15],2)} Saldo deudo: {round(row[16],2)} \nNombre del Cliente: {row[3]} {row[4]} {row[5]}"
+                mensaje2 = f"Latitud {row[6]} Longitud {row[7]} \nId_colonia: {row[8]} Colonia: {row[9]} \nidPersonal: {row[10]} Nombre personal: {row[11]} \nUsuario: {row[12]} clave: {row[13]}"
                 imprimir(mensaje1, mensaje2, file)
         else:
             print("registros no encontrados")
