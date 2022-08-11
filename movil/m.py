@@ -3,7 +3,7 @@ import menus as menu
 import consultas as consulta
 import sys
 
-opciones = {"mod":1,"rutas":2,"contrato":3,"vista":4,"contratov":5,"abonos":6,"abonosrecibidos":7,"alta":8}
+opciones = {"mod":1,"rutas":2,"contrato":3,"vista":4,"contratov":5,"abonos":6,"abonosrecibidos":7,"alta":8,"generarAbono":9}
 
 def run():
     busqueda=opciones[sys.argv[2]]
@@ -32,6 +32,8 @@ def run():
         consulta.busquedaAbonosCobrador(interfazSql,parametro,baseDeDatos)
     elif busqueda == 8:
         consulta.agregarPersona(interfazSql,cnx)
+    elif busqueda == 9:
+        consulta.generadorDeAbonos(interfazSql,parametro,baseDeDatos)
     cnx.close()
 if __name__ == '__main__':
     run()

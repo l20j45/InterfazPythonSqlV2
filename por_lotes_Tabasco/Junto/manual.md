@@ -37,5 +37,5 @@ p3 AltaContratos.py && cat contratossql.txt | clip.exe
    ```
 
 7. ejecutamos todo el script
-
+   
     cat juntos.sql | clip.exe

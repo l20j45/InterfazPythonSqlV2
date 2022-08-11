@@ -4,6 +4,8 @@ import os
 from urllib.parse import quote
 import mysql.connector
 import re
+import string
+import random
 
 
 listaEstatus = {0: 'Nuevo', 1: 'Firma', 2: 'Entregado', 3: 'Activo',
@@ -136,17 +138,20 @@ def busquedaCruzada(interfazSql, nombre, baseDeDatos):
     sql = f"""SELECT fp.idpersonal, concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) as nombreCompleto ,a.idagente_folio, a.folio, 
     case a.status_folio
          WHEN '0' THEN "Nuevo"
-					WHEN  1 THEN "Firma"
-					WHEN  2 THEN "Entregado"
+					WHEN  1 THEN "Recepcionado"
+					WHEN  2 THEN "Contrato Hecho"
 					WHEN  3 THEN "Activo"
-					WHEN  4 THEN "Suspendido"
+					WHEN  4 THEN "Cancelado"
 					WHEN  5 THEN "Domicilio"
 					WHEN  6 THEN "Cancelado"
 					WHEN  7 THEN "Pagado"
 					WHEN  8 THEN "Utilizado"
-					END AS Estatus
+					END AS Estatus,
+       ss.station as SucursalPersonal,ss2.station as SucursalFolio,fp.usuario,fp.clave
     from funeraria_personal fp
-    inner join funeraria_agente_folios a on a.idpersonal = fp.idpersonal
+    left join funeraria_agente_folios a on a.idpersonal = fp.idpersonal
+    left join system_station ss on fp.idsucursal = ss.idstation
+    left join system_station ss2 on ss2.idstation = a.sucursal_origen
     where concat_ws(" ",fp.Nombre, fp.Paterno, fp.Materno) like "%%{nombre}%%" or fp.usuario like '%{nombre}%'  and a.status_folio=0 ORDER BY a.fecha , a.folio; """
     print(sql)
     try:
@@ -156,18 +161,18 @@ def busquedaCruzada(interfazSql, nombre, baseDeDatos):
         datos = menuFunesBusqueda(baseDeDatos)
         print(datos[0])
         if len(registros) != 0:
-            print(f"\npersona buscada: {nombre}")
+            print(f"\npersona buscada: {nombre}\nUsuario: {registros[0][7]} Clave: {registros[0][8]} \nSucursal de la persona {registros[0][5]}")
             file = open('Cruzada.txt', 'w')
-            file.write(f"{datos[0]} \npersona buscada: {nombre}\n")
+            file.write(f"\npersona buscada: {nombre}\n Usuario:{registros[0][7]} Clave:{registros[0][8]} \nSucursal de la persona {registros[0][5]}")
             file.write(
                 "=====================================================\n")
             print("=====================================================\n")
             encabezado = ['idpersonal', 'nombre_completo', 'Cadena especial',
-                                  'Folio', 'Estatus']
+                                  'Folio', 'Estatus','SucursalDelVendedor','SucursalDelFolio','Usario','Clave']
             guardarCsv("Cruzada", encabezado, registros)
             for row in registros:
-                mensaje1 = f"codigo personal: {row[0]} persona encontrada: {row[1]}"
-                mensaje2 = f"Cadena especial: {row[2]} Folio: {row[3]} estatus {row[4]}"
+                mensaje1 = f"Codigo personal: {row[0]} persona encontrada: {row[1]}"
+                mensaje2 = f"Cadena especial: {row[2]} Folio: {row[3]} Estatus: {row[4]} Sucursal: {row[6]}"
                 imprimir(mensaje1, mensaje2, file)
         else:
             print("registros no encontrados")
@@ -194,6 +199,19 @@ def modAplicacion(interfazSql, baseDeDatos):
         except mysql.connector.Error as err:
             print(err)
             print("Message", err.msg)
+    sql = f"SELECT password_company FROM apps_db WHERE basedatos_db='{datos[3]} '";
+    try:
+        interfazSql.execute(sql)  # ejecutamos el sql
+        registros = interfazSql.fetchall()  # vemos cuantos registros trae el sql
+        if len(registros) != 0:
+            for row in registros:
+                print("Contraseña de la app :", row[0])
+        else:
+            print("No registros")
+    except mysql.connector.Error as err:
+            print(err)
+            print("Message", err.msg)
+    
 
 
 def busquedaContratoApp(interfazSql, folio, baseDeDatos):
@@ -913,7 +931,7 @@ where full_name like '%{folio}%' or iduser like '%{folio}%';"""
             left join system_station ss on ss.idstation = sp.idstation
             left join system_layer_module slm on sm.idmodule = slm.idmodule
             left join system_layer sl on slm.idlayer = sl.idlayer
-            WHERE su.iduser="QYDLK07Y9KVTQO"
+            WHERE su.iduser="{idpersonal}"
             order by ss.station,sl.title;"""
             print(sql)
             try:
@@ -951,6 +969,67 @@ where full_name like '%{folio}%' or iduser like '%{folio}%';"""
             except mysql.connector.Error as err:
                 print(err)
                 print("Message", err.msg)
+    except mysql.connector.Error as err:
+        print(err)
+        print("Message", err.msg)
+
+
+def generadorDeAbonos(interfazSql, folio, baseDeDatos):
+    os.system("clear")
+    sql = f"""select concat_ws(' ',Nombre,Paterno,Materno) as nombreCompleto, idpersonal, idgrupo
+from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{folio}%'"""
+    print(sql)
+    try:
+        interfazSql.execute(sql)  # ejecutamos el sql
+        registros = interfazSql.fetchall()  # vemos cuantos registros trae el sql
+        # print(len(prueba)) imprimimos el numero de registros
+        datos = menuFunesBusqueda(baseDeDatos)
+        print(datos[0])
+        contador = 0
+        listaId = []
+        listaPersona = []
+        listaGroup = []
+        if len(registros) != 0:
+            print(f"\Persona buscada Buscado:{folio}")
+            print("=====================================================")
+            for row in registros:
+                print(f"opcion {contador}: persona : {row[0]} id : {row[1]}")
+                listaId.append(row[1])
+                listaPersona.append(row[0])
+                listaGroup.append(row[2])
+                contador += 1
+            opcion = int(input("Que persona deseas buscar?: "))
+            idPersona = listaId[opcion]
+            nombreMostrar = listaPersona[opcion]
+            grupo = listaGroup[opcion]
+            fechaFormateada = date.today()
+            length_of_string = 21
+            
+            print(idPersona)
+
+            sql1 = f"""SELECT folio,latitud,longitud
+                FROM online_view_app_contratos
+                WHERE idpersonal='{idPersona}';"""
+            print(sql1)
+
+            interfazSql.execute(sql1)  # ejecutamos el sql
+            registros2 = interfazSql.fetchall()
+            if len(registros2) != 0:
+
+                print(f"\Persona buscada Buscado:{nombreMostrar}")
+                print("=====================================================")
+                file = open('abonosGenerados.txt', 'w')
+                contador = 0
+                print(registros2)
+                for row in registros2:
+                    status1 = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(length_of_string))
+                    sql = f"INSERT INTO `online_android_abonos_individual` (`idabono_individual`, `Folio`, `idcobrador`, `Abono`, `Reimprecion`, `Latitud`, `Longitud`, `Fecha_pago`, `Hora_pago`, `idgrupo`, `cobrado_oficina`) VALUES ('{status1}', '{row[0]}', '{idPersona}', 100, 0, '{row[1]}', '{row[2]}', '{fechaFormateada}', '14:00:0', '1', 0);\n"
+                    imprimirUnaLinea(sql, file)
+                    contador += 1
+            else:
+                print("esta persona no tiene contratos en vistas")
+        else:
+            print("registros no encontrados")
     except mysql.connector.Error as err:
         print(err)
         print("Message", err.msg)
