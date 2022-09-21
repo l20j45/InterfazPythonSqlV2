@@ -8,6 +8,7 @@ import string
 import random
 
 
+
 listaEstatus = {0: 'Nuevo', 1: 'Firma', 2: 'Entregado', 3: 'Activo',
                 4: 'Suspendido', 5: 'Domicilio', 6: 'Cancelado', 7: 'Pagado', 8: 'Utilizado'}
 listaTipoDeCobranza = {0: 'Domicilio', 1: 'Oficina'}
@@ -66,7 +67,7 @@ def busquedaFolio(interfazSql, folios, baseDeDatos):
                     guardarCsvAppendContenido("folios",registros)
                     print("=====================================================")
                     for row in registros:
-                        mensaje1 = f"Folio: {folioBuscar} \ncadena especial: {row[0]}, estatus:{row[1]} nombrecompleto: {row[2]}  sucursal:{row[3]}  "
+                        mensaje1 = f"Folio: {folioBuscar} \ncadena especial: {row[0]}, folio:{row[1]} estatus: {row[2]}  nombre:{row[3]}  sucursal:{row[4]}"
                         imprimirUnaLinea(mensaje1, file)
                 else:
                     print("registros no encontrados")
@@ -773,7 +774,7 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
             if fecha == "1":
                 fechaFormateada = date.today()
             else:
-                fechaFormateada = datetime.strptime(fecha, '%Y-%m-%d')
+                fechaFormateada = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S')
             diasAtras = int(input("cuantos dias antes: "))
             FechaAnterior = fechaFormateada - timedelta(days=diasAtras)
             print(idpersonal)
@@ -879,7 +880,7 @@ def agregarPersona(interfazSql, cnx):
     print(f"seleccionaste esta funeraria {listaFunerarias[opcion]} ")
     nombrePersona = input("a quien daras de alta?: ")
     imei = input("cual es su imei?: ")
-    app = input("en que app necesitas? 0 0 cobranza 1 = ventas 2 = logistica: ")
+    app = input("en que app necesitas? 0 = cobranza 1 = ventas 2 = logistica: ")
     db = listaFunerariasdb[opcion]
     empresa = listaFunerariasidEmpresa[opcion]
     fechaFormateada = date.today()
