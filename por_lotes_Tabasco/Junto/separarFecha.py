@@ -1,5 +1,5 @@
 contador=0
-file = open('fechasAcomodadas.txt','w')
+file = open('fechas.tratado','w')
 with open('fechas.txt', 'r') as f:
     for linea in f:
         print(linea)

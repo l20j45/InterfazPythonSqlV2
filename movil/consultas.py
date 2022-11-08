@@ -8,7 +8,6 @@ import string
 import random
 
 
-
 listaEstatus = {0: 'Nuevo', 1: 'Firma', 2: 'Entregado', 3: 'Activo',
                 4: 'Suspendido', 5: 'Domicilio', 6: 'Cancelado', 7: 'Pagado', 8: 'Utilizado'}
 listaTipoDeCobranza = {0: 'Domicilio', 1: 'Oficina'}
@@ -24,7 +23,7 @@ def busquedaFolio(interfazSql, folios, baseDeDatos):
     for letra in folios:
         if letra in "-":
             rango = True
-    if(rango):
+    if (rango):
         minyMax = folios.split("-")
         rango = range(int(minyMax[0]), int(minyMax[1]),)
     else:
@@ -37,8 +36,8 @@ def busquedaFolio(interfazSql, folios, baseDeDatos):
         file.write(datos[0])
         print("\nfolios buscados: ")
         print(rango)
-        encabezado = ['idFolio','folio', 'Estatus', 'Nombre Completo',
-                                  'Sucursal']
+        encabezado = ['idFolio', 'folio', 'Estatus', 'Nombre Completo',
+                      'Sucursal']
         guardarCsvEncabezado("folios", encabezado)
         for folioBuscar in rango:
             file.write("\n")
@@ -64,7 +63,7 @@ def busquedaFolio(interfazSql, folios, baseDeDatos):
                 interfazSql.execute(sql)
                 registros = interfazSql.fetchall()  # vemos cuantos registros trae el sql
                 if len(registros) != 0:
-                    guardarCsvAppendContenido("folios",registros)
+                    guardarCsvAppendContenido("folios", registros)
                     print("=====================================================")
                     for row in registros:
                         mensaje1 = f"Folio: {folioBuscar} \ncadena especial: {row[0]}, folio:{row[1]} estatus: {row[2]}  nombre:{row[3]}  sucursal:{row[4]}"
@@ -83,9 +82,22 @@ def busquedaFolio(interfazSql, folios, baseDeDatos):
 def busquedaFolioContrato(interfazSql, folio, baseDeDatos):
     os.system("clear")
     file = open('contratos.txt', 'w')
-    sql = """SELECT idcontrato_individual,folio
-        FROM funeraria_contrato_individual
-        WHERE folio like "%%%s%%"; """ % quote(str(folio), safe='')
+    sql = f"""SELECT fci.idcontrato_individual,fci.Folio,ss.station,fp.nombre_completo,
+    case fci.Estatus
+         WHEN '0' THEN "Nuevo"
+					WHEN  1 THEN "Firma"
+					WHEN  2 THEN "Entregado"
+					WHEN  3 THEN "Activo"
+					WHEN  4 THEN "Suspendido"
+					WHEN  5 THEN "Domicilio"
+					WHEN  6 THEN "Cancelado"
+					WHEN  7 THEN "Pagado"
+					WHEN  8 THEN "Utilizado"
+					END AS Estatus
+FROM funeraria_contrato_individual fci
+LEFT JOIN system_station ss ON ss.idstation = fci.idsucursal
+LEFT JOIN funeraria_personal fp ON fp.idpersonal = fci.idvendedor
+WHERE folio like "%{folio}%";"""
     print(sql)
     try:
         interfazSql.execute(sql)
@@ -94,7 +106,7 @@ def busquedaFolioContrato(interfazSql, folio, baseDeDatos):
         print(datos[0])
         if len(registros) != 0:
             for row in registros:
-                mensaje1 = f"Contrato: {row[1]} \ncadena especial: {row[0]}"
+                mensaje1 = f"Contrato: {row[1]} Sucursal: {row[2]} Vendedor: {row[3]} \nEstatus: {row[4]} Cadena especial: {row[0]}"
                 imprimirUnaLinea(mensaje1, file)
         else:
             print("registros no encontrados")
@@ -162,14 +174,16 @@ def busquedaCruzada(interfazSql, nombre, baseDeDatos):
         datos = menuFunesBusqueda(baseDeDatos)
         print(datos[0])
         if len(registros) != 0:
-            print(f"\npersona buscada: {nombre}\nUsuario: {registros[0][7]} Clave: {registros[0][8]} \nSucursal de la persona {registros[0][5]}")
+            print(
+                f"\npersona buscada: {nombre}\nUsuario: {registros[0][7]} Clave: {registros[0][8]} \nSucursal de la persona {registros[0][5]}")
             file = open('Cruzada.txt', 'w')
-            file.write(f"\npersona buscada: {nombre}\n Usuario:{registros[0][7]} Clave:{registros[0][8]} \nSucursal de la persona {registros[0][5]}")
+            file.write(
+                f"\npersona buscada: {nombre}\n Usuario:{registros[0][7]} Clave:{registros[0][8]} \nSucursal de la persona {registros[0][5]}")
             file.write(
                 "=====================================================\n")
             print("=====================================================\n")
             encabezado = ['idpersonal', 'nombre_completo', 'Cadena especial',
-                                  'Folio', 'Estatus','SucursalDelVendedor','SucursalDelFolio','Usario','Clave']
+                          'Folio', 'Estatus', 'SucursalDelVendedor', 'SucursalDelFolio', 'Usario', 'Clave']
             guardarCsv("Cruzada", encabezado, registros)
             for row in registros:
                 mensaje1 = f"Codigo personal: {row[0]} persona encontrada: {row[1]}"
@@ -188,7 +202,7 @@ def modAplicacion(interfazSql, baseDeDatos):
     print("Se a cambiado tu aplicacion a "+datos[0])
     listasid = [78, 93, 121, 135, 254, 298, 299, 306, 307, 308]
     for id in listasid:
-        if(baseDeDatos not in [13, 14, 15]):
+        if (baseDeDatos not in [13, 14, 15]):
             sql = """UPDATE `gruposefi`.`apps_imei` SET `idempresa`='%s', `imei_iddb`='%s'
          WHERE  `idseries`='%d';""" % (datos[2], datos[1], id)
         else:
@@ -200,7 +214,7 @@ def modAplicacion(interfazSql, baseDeDatos):
         except mysql.connector.Error as err:
             print(err)
             print("Message", err.msg)
-    sql = f"SELECT password_company FROM apps_db WHERE basedatos_db='{datos[3]} '";
+    sql = f"SELECT password_company FROM apps_db WHERE basedatos_db='{datos[3]} '"
     try:
         interfazSql.execute(sql)  # ejecutamos el sql
         registros = interfazSql.fetchall()  # vemos cuantos registros trae el sql
@@ -210,9 +224,8 @@ def modAplicacion(interfazSql, baseDeDatos):
         else:
             print("No registros")
     except mysql.connector.Error as err:
-            print(err)
-            print("Message", err.msg)
-    
+        print(err)
+        print("Message", err.msg)
 
 
 def busquedaContratoApp(interfazSql, folio, baseDeDatos):
@@ -272,9 +285,9 @@ where FCI.FOLIO LIKE "%{folio}%";"""
             file = open('ContratosApp.txt', 'w')
             file.write(f"{datos[0]}\nContrato Buscado: {folio}")
             file.write("=====================================================")
-            encabezado = ['idcontrato_individual','Folio','etatus',
-       'Nombre','Apellido_Paterno', 'Apellido_Materno', 'latitud','longitud','idcolonia','Colonia','idpersonal','nombre_completo','usuario','clave', 'Fecha','Monto_Liquidado','Saldo_Deudor',
-       'Tipo_Cobranza', 'pago_programado', 'dia de cobranza', 'dias de cobro']
+            encabezado = ['idcontrato_individual', 'Folio', 'etatus',
+                          'Nombre', 'Apellido_Paterno', 'Apellido_Materno', 'latitud', 'longitud', 'idcolonia', 'Colonia', 'idpersonal', 'nombre_completo', 'usuario', 'clave', 'Fecha', 'Monto_Liquidado', 'Saldo_Deudor',
+                          'Tipo_Cobranza', 'pago_programado', 'dia de cobranza', 'dias de cobro']
             guardarCsv("ContratosApp", encabezado, registros)
             for row in registros:
 
@@ -416,7 +429,8 @@ ORDER BY ss.station,faacu.idaccion_campo,faacu.estatus DESC;"""
             file = open('Permisos.txt', 'w')
             file.write(f"{datos[0]}\nPersona buscada:{nombre}")
             file.write("=====================================================")
-            encabezado = ['full_name','username','password','modulo','campo','estatus','station','idaccion_campo']
+            encabezado = ['full_name', 'username', 'password',
+                          'modulo', 'campo', 'estatus', 'station', 'idaccion_campo']
             guardarCsv("Permisos", encabezado, registros)
             for row in registros:
                 mensaje1 = f"Persona encontrada: {row[0]} \nUsuario: {row[1]} Contraseña: {row[2]}\nId_accion_campo: {row[7]}"
@@ -505,7 +519,8 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                 file.write(f"{datos[0]}\nPersona buscada: {nombreMostrar}")
                 file.write(
                     "\n=====================================================")
-                encabezado = ['folio','idcontrato_individual','Colonia', 'nombre','latitud','longitud','Ultimo_Pago','APP_Ultimo_Pago','Numero_pagos','APP_Numero_pagos','pagos']
+                encabezado = ['folio', 'idcontrato_individual', 'Colonia', 'nombre', 'latitud', 'longitud',
+                              'Ultimo_Pago', 'APP_Ultimo_Pago', 'Numero_pagos', 'APP_Numero_pagos', 'pagos']
                 guardarCsv("vistaApp", encabezado, registros2)
                 contador = 0
                 contadorSinGps = 0
@@ -519,10 +534,13 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                     contador += 1
                 print("=====================================================")
                 print(f"NUMERO DE CONTRATOS EN LA APP : {contador-1}")
-                print(f"NUMERO DE CONTRATOS EN LA APP SIN PUNTOS GPS : {contadorSinGps}")
-                print(f"NUMERO DE CONTRATOS EN LA APP CON PUNTOS GPS : {contador-1-contadorSinGps}")
-                contenidoExtra=[(f"NUMERO DE CONTRATOS EN LA APP : {contador-1}",""),(f"NUMERO DE CONTRATOS EN LA APP SIN PUNTOS GPS : {contadorSinGps}",""),(f"NUMERO DE CONTRATOS EN LA APP CON PUNTOS GPS : {contador-1-contadorSinGps}","")]
-                guardarCsvAppendColumna("vistaApp",contenidoExtra)
+                print(
+                    f"NUMERO DE CONTRATOS EN LA APP SIN PUNTOS GPS : {contadorSinGps}")
+                print(
+                    f"NUMERO DE CONTRATOS EN LA APP CON PUNTOS GPS : {contador-1-contadorSinGps}")
+                contenidoExtra = [(f"NUMERO DE CONTRATOS EN LA APP : {contador-1}", ""), (f"NUMERO DE CONTRATOS EN LA APP SIN PUNTOS GPS : {contadorSinGps}", ""), (
+                    f"NUMERO DE CONTRATOS EN LA APP CON PUNTOS GPS : {contador-1-contadorSinGps}", "")]
+                guardarCsvAppendColumna("vistaApp", contenidoExtra)
             else:
                 print("esta persona no tiene contratos en vistas")
         else:
@@ -556,7 +574,8 @@ def busquedaContratoVista(interfazSql, folio, baseDeDatos):
             file.write(f"{datos[0]}\nContrato Buscado: {folio}")
             file.write(
                 "\n=====================================================")
-            encabezado = ['folio','idcontrato_individual','Colonia','nombre','latitud','longitud','Ultimo_Pago','APP_Ultimo_Pago','Numero_pagos','APP_Numero_pagos','pagos','nombreVendedor','usuario']
+            encabezado = ['folio', 'idcontrato_individual', 'Colonia', 'nombre', 'latitud', 'longitud', 'Ultimo_Pago',
+                          'APP_Ultimo_Pago', 'Numero_pagos', 'APP_Numero_pagos', 'pagos', 'nombreVendedor', 'usuario']
             guardarCsv("ContratosAppVista", encabezado, registros)
             for row in registros:
                 mensaje1 = f"registro : {contador+1}\nfolio {row[0]}: idcontrato : {row[1]} ruta : {row[2]}\nnombre del vendedor: {row[11]} usuario: {row[12]} \nnombre {row[3]}: latitud : {round(float(row[4]),5)} longitud : {round(float(row[5]),5)}"
@@ -621,7 +640,8 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                         f"{datos[0]}\npersona buscada: {nombreMostrar}\n")
                     file.write(
                         "=====================================================\n")
-                    encabezado = ['idpersonal','nombre_completo','usuario','clave','idcolonia','Colonia','Localidad','Municipio','Estado']
+                    encabezado = ['idpersonal', 'nombre_completo', 'usuario', 'clave',
+                                  'idcolonia', 'Colonia', 'Localidad', 'Municipio', 'Estado']
                     guardarCsv("LocalidadesApp", encabezado, registros)
                     for row in registros:
                         mensaje1 = f"Persona encontrada: {row[1]} \nCodigo: {row[0]} Usuario: {row[2]} Contraseña: {row[3]}"
@@ -644,8 +664,10 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                     interfazSql.execute(sql)  # ejecutamos el sql
                     registros2 = interfazSql.fetchall()  # vemos cuantos registros trae el sql
                     if len(registros2) != 0:
-                        contenidoExtra=[(f"numero de contratos: {registros2[0][0]}",""),(f"tiene : {totalColonias} de colonias","")]
-                        guardarCsvAppendColumna("LocalidadesApp",contenidoExtra)
+                        contenidoExtra = [(f"numero de contratos: {registros2[0][0]}", ""), (
+                            f"tiene : {totalColonias} de colonias", "")]
+                        guardarCsvAppendColumna(
+                            "LocalidadesApp", contenidoExtra)
                         for row2 in registros2:
                             mensaje1 = f"numero de contratos: {row2[0]} \ntiene : {totalColonias} de colonias"
                             imprimirUnaLinea(mensaje1, file)
@@ -711,7 +733,8 @@ def busquedaAbonos(interfazSql, folio, baseDeDatos):
                     file.write(f"{datos[0]}\Folio buscada: {nombreMostrar}\n")
                     file.write(
                         "=====================================================\n")
-                    encabezado = ['Folio','nombre_completo','Abono','bonificacion','Fecha_Android','Fecha_Oficina','estatus']
+                    encabezado = ['Folio', 'nombre_completo', 'Abono',
+                                  'bonificacion', 'Fecha_Android', 'Fecha_Oficina', 'estatus']
                     guardarCsv("abonosContratos", encabezado, registros)
                     for row in registros:
                         listaVendedores.append(row[1])
@@ -729,8 +752,10 @@ def busquedaAbonos(interfazSql, folio, baseDeDatos):
                     interfazSql.execute(sql2)  # ejecutamos el sql
                     registros2 = interfazSql.fetchall()  # vemos cuantos registros trae el sql
                     if len(registros2) != 0:
-                        encabezado = ['idcontrato_individual','Folio','total','Abonos','Bonificacion','Funeraria','pago_inicial', 'numero de abonos','precio_paquete']
-                        guardarCsvAppend("abonosContratos", encabezado, registros2)
+                        encabezado = ['idcontrato_individual', 'Folio', 'total', 'Abonos', 'Bonificacion',
+                                      'Funeraria', 'pago_inicial', 'numero de abonos', 'precio_paquete']
+                        guardarCsvAppend("abonosContratos",
+                                         encabezado, registros2)
                         for row in registros2:
                             mensaje1 = f"idContrato: {row[0]} \nFolio: {row[1]} Costo paquete : {float(row[8])} restante : {float(row[8])-float(row[2])-float(row[6])}\nTotal: {float(row[2])} Abonos: {float(row[3])} Bonificacion: {float(row[4])} "
                             mensaje2 = f"Funeraria: {float(row[5])} Pago Inicial: {float(row[6])} Total de abonos : {row[7]}"
@@ -814,8 +839,9 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                         imprimirUnaLinea(mensaje1, file)
                         contador += 1
                         total += row[4]
-                    contenidoExtra=[(f"hubo {contador} abonos en android online con un total de {total:,.2f} ","")]
-                    guardarCsvAppendColumna("AbonosDados",contenidoExtra)    
+                    contenidoExtra = [
+                        (f"hubo {contador} abonos en android online con un total de {total:,.2f} ", "")]
+                    guardarCsvAppendColumna("AbonosDados", contenidoExtra)
                     print(
                         f"\nhubo {contador} abonos en android online con un total de {total:,.2f} ")
                 else:
@@ -855,8 +881,9 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                         contador += 1
                         totalAbonos += row[5]
                         totalBonificacion += row[6]
-                    contenidoExtra=[(f"hubo {contador} abonos en recibidos con un total de {totalAbonos:,.2f} y una bonificacion total de total de {totalBonificacion:,.2f} ","")]
-                    guardarCsvAppendColumna("AbonosDados",contenidoExtra)  
+                    contenidoExtra = [
+                        (f"hubo {contador} abonos en recibidos con un total de {totalAbonos:,.2f} y una bonificacion total de total de {totalBonificacion:,.2f} ", "")]
+                    guardarCsvAppendColumna("AbonosDados", contenidoExtra)
                     print(
                         f"\nhubo {contador} abonos en recibidos con un total de {totalAbonos:,.2f} y una bonificacion total de total de {totalBonificacion:,.2f} ")
                 else:
@@ -1005,7 +1032,7 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
             grupo = listaGroup[opcion]
             fechaFormateada = date.today()
             length_of_string = 21
-            
+
             print(idPersona)
 
             sql1 = f"""SELECT folio,latitud,longitud
@@ -1023,7 +1050,8 @@ from funeraria_personal where concat_ws(' ',Nombre,Paterno,Materno) like '%{foli
                 contador = 0
                 print(registros2)
                 for row in registros2:
-                    status1 = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(length_of_string))
+                    status1 = ''.join(random.SystemRandom().choice(
+                        string.ascii_letters + string.digits) for _ in range(length_of_string))
                     sql = f"INSERT INTO `online_android_abonos_individual` (`idabono_individual`, `Folio`, `idcobrador`, `Abono`, `Reimprecion`, `Latitud`, `Longitud`, `Fecha_pago`, `Hora_pago`, `idgrupo`, `cobrado_oficina`) VALUES ('{status1}', '{row[0]}', '{idPersona}', 100, 0, '{row[1]}', '{row[2]}', '{fechaFormateada}', '14:00:0', '1', 0);\n"
                     imprimirUnaLinea(sql, file)
                     contador += 1

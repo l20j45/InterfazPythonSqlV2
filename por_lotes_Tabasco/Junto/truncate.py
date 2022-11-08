@@ -3,7 +3,7 @@
 import mysql.connector
 
 miConexion = mysql.connector.connect( 
-                                     host='localhost', 
+                                     host='192.168.100.9', 
                                      user= 'root', 
                                      passwd='root', 
                                      db='katana',

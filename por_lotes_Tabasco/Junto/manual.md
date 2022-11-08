@@ -15,27 +15,56 @@ p3 aleatorios.py && notepad.exe AleatoriosContratos.txt && notepad.exe Aleatorio
 3. Usar el script de los contratos 
 
 ```bash
-p3 AltaContratos.py && cat contratossql.txt | clip.exe
+p3 AltaContratoCsv1.py  && cat contratossqlTratado.Sql | clip.exe
 ```
 
-4. Usamos la alta de abonos 
+4. Usamos el scritps para comprimirlo ya que esta bien
+
+```bash
+ p3 AltaContratoCsv2.py && cat ContratosSqlTratadoZip.sql | clip.exe
+```
+
+5. Usamos la alta de abonos 
    
    ```bash
-   p3 AltaAbonos.py && cat abonosSql.txt | clip.exe
+   p3 AltaAbonosV2csv1.py  && cat abonosSqlTratado.Sql | clip.exe
    ```
-
-5. juntamos los dos en un archivo sql 
+   
+6. Usamos la alta de abonos para comprimirlo ya que esta bien
    
    ```bash
-   cat contratossql.txt abonosSql.txt > juntos.sql
+   p3 AltaAbonosV2csv1.py  && cat abonosSqlTratado.Sql | clip.exe
+   ```
+   
+7. Usamos la alta de abonos 
+   
+   ```bash
+   p3 AltaAbonosV2csv1.py  && cat abonosSqlTratado.Sql | clip.exe
    ```
 
-6. truncamos de nuevo 
+8. Ejecutamos para generar los gestores
+   
+   ```bash
+   p3 AltaGestorContratos.py
+   ```
+   ```bash
+   p3 AltaGestorAbonos.py
+   ```
+
+9. truncamos de nuevo 
    
    ```bash
    p3 truncate.py
    ```
 
-7. ejecutamos todo el script
-   
-    cat juntos.sql | clip.exe
+10. Juntamos las salidas
+
+   ```bash
+   p3 truncate.py
+   ```
+   ```bash
+   p3 truncate.py
+   ```
+   ```bash
+   p3 truncate.py
+   ```

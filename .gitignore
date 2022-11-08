@@ -140,3 +140,8 @@ nohup.out
 *.sql
 *.7z
 movil\respaldosEspecifico
+*.sqlZip
+*.NubeUp
+*..Tratado
+*.Tratado
+*.NubeUpSql

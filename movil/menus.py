@@ -17,6 +17,8 @@ def MenuFunes():
     print("13.- DEMO")
     print("14.- Developer 1")
     print("15.- Developer 2")
+    print("16.- Contreras")
+    print("17.- San ramon")
     
 def MenuArchivoPrincipal():
     print("archivo p o principal")
@@ -100,6 +102,10 @@ def menuFunesBusqueda(baseDeDatos):
         datos = ["14.- Developer 1", "DEV123","DEVELOPER 1","distributor_solutionsoft_developer"]
     elif baseDeDatos == 15:
         datos = ["15.- Developer 2", "DVL123","DEVELOPER","distributor_solutionsoft_developer2"]
+    elif baseDeDatos == 16:
+        datos = ["16.- Contreras", "DVL123","CONTRERAS","hanbai_fune_contreras"]
+    elif baseDeDatos == 17:
+        datos = ["17.- San Ramon", "DVL123","San ramon","hanbai_fune_sanramon"]
     return datos
     
 def imprimir(mensaje1, mensaje2,file):
